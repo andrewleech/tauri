@@ -27,7 +27,7 @@ fn patch_binary(binary: &PathBuf, package_type: &PackageType) -> crate::Result<(
       );
       linux::patch_binary(binary, package_type)?;
     }
-    PackageType::Nsis | PackageType::WindowsMsi => {
+    PackageType::Nsis | PackageType::WindowsMsi | PackageType::WindowsMsix => {
       log::info!(
         "Patching binary {:?} for type {}",
         binary,
@@ -150,6 +150,7 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<Bundle>> {
 
       #[cfg(target_os = "windows")]
       PackageType::WindowsMsi => windows::msi::bundle_project(settings, false)?,
+      PackageType::WindowsMsix => windows::msix::bundle_project(settings)?,
       PackageType::Nsis => windows::nsis::bundle_project(settings, false)?,
 
       #[cfg(target_os = "linux")]
@@ -179,6 +180,7 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<Bundle>> {
             | PackageType::MacOsBundle
             | PackageType::Nsis
             | PackageType::WindowsMsi
+            | PackageType::WindowsMsix
             | PackageType::Deb
         )
       } else {
@@ -195,7 +197,7 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<Bundle>> {
         // Self contained updater, no need to zip
         matches!(
           package_type,
-          PackageType::AppImage | PackageType::Nsis | PackageType::WindowsMsi | PackageType::Deb
+          PackageType::AppImage | PackageType::Nsis | PackageType::WindowsMsi | PackageType::WindowsMsix | PackageType::Deb
         )
       })
     {

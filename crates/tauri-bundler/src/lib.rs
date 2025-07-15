@@ -13,6 +13,8 @@
 //!   - Appimage, Debian and RPM packages
 //! - Windows
 //!   - MSI using WiX
+//!   - MSIX packages
+//!   - NSIS installers
 
 #![doc(
   html_logo_url = "https://github.com/tauri-apps/tauri/raw/dev/.github/icon.png",

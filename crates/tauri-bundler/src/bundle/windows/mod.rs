@@ -5,6 +5,7 @@
 
 #[cfg(target_os = "windows")]
 pub mod msi;
+pub mod msix;
 
 pub mod nsis;
 pub mod sign;

@@ -31,6 +31,8 @@ pub enum PackageType {
   IosBundle,
   /// The Windows bundle (.msi).
   WindowsMsi,
+  /// The Windows MSIX bundle (.msix).
+  WindowsMsix,
   /// The NSIS bundle (.exe).
   Nsis,
   /// The Linux Debian package bundle (.deb).
@@ -68,6 +70,7 @@ impl PackageType {
       "deb" => Some(PackageType::Deb),
       "ios" => Some(PackageType::IosBundle),
       "msi" => Some(PackageType::WindowsMsi),
+      "msix" => Some(PackageType::WindowsMsix),
       "nsis" => Some(PackageType::Nsis),
       "app" => Some(PackageType::MacOsBundle),
       "rpm" => Some(PackageType::Rpm),
@@ -85,6 +88,7 @@ impl PackageType {
       PackageType::Deb => "deb",
       PackageType::IosBundle => "ios",
       PackageType::WindowsMsi => "msi",
+      PackageType::WindowsMsix => "msix",
       PackageType::Nsis => "nsis",
       PackageType::MacOsBundle => "app",
       PackageType::Rpm => "rpm",
@@ -110,6 +114,7 @@ impl PackageType {
       PackageType::MacOsBundle => 0,
       PackageType::IosBundle => 0,
       PackageType::WindowsMsi => 0,
+      PackageType::WindowsMsix => 0,
       PackageType::Nsis => 0,
       PackageType::Deb => 0,
       PackageType::Rpm => 0,
@@ -127,6 +132,8 @@ const ALL_PACKAGE_TYPES: &[PackageType] = &[
   PackageType::IosBundle,
   #[cfg(target_os = "windows")]
   PackageType::WindowsMsi,
+  #[cfg(target_os = "windows")]
+  PackageType::WindowsMsix,
   #[cfg(target_os = "windows")]
   PackageType::Nsis,
   #[cfg(target_os = "macos")]
