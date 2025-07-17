@@ -39,7 +39,7 @@ semver = "1"
 sha1 = "0.10"
 sha2 = "0.10"
 zip = { version = "4", default-features = false, features = ["deflate"] }
-msix = { git = "https://github.com/andrewleech/xbuild.git", branch = "feature/msix-builder-improvements" }
+msix = { path = "../../../msix-fork/msix" }
 dunce = "1"
 url = "2"
 uuid = { version = "1", features = ["v4", "v5"] }
