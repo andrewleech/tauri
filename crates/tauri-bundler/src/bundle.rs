@@ -67,14 +67,20 @@ pub struct Bundle {
 /// Bundles the project.
 /// Returns the list of paths where the bundles can be found.
 pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<Bundle>> {
+  println!("🔍 BUNDLER: Starting bundle_project");
   let mut package_types = settings.package_types()?;
+  println!("🔍 BUNDLER: Requested package types: {:?}", package_types);
+  
   if package_types.is_empty() {
+    println!("🔍 BUNDLER: No package types requested, returning empty");
     return Ok(Vec::new());
   }
 
   package_types.sort_by_key(|a| a.priority());
+  println!("🔍 BUNDLER: Package types after sorting by priority: {:?}", package_types);
 
   let target_os = settings.target_platform();
+  println!("🔍 BUNDLER: Target OS: {:?}", target_os);
 
   if *target_os != TargetPlatform::current() {
     log::warn!("Cross-platform compilation is experimental and does not support all features. Please use a matching host system for full compatibility.");
@@ -120,9 +126,13 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<Bundle>> {
     .expect("Main binary missing in settings");
 
   let mut bundles = Vec::<Bundle>::new();
-  for package_type in &package_types {
+  println!("🔍 BUNDLER: Starting bundle processing for {} package types", package_types.len());
+  for (i, package_type) in package_types.iter().enumerate() {
+    println!("🔍 BUNDLER: Processing package type {}/{}: {:?}", i + 1, package_types.len(), package_type);
+    
     // bundle was already built! e.g. DMG already built .app
     if bundles.iter().any(|b| b.package_type == *package_type) {
+      println!("🔍 BUNDLER: Skipping {:?} - already built", package_type);
       continue;
     }
 
@@ -130,6 +140,7 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<Bundle>> {
       log::warn!("Failed to add bundler type to the binary: {e}. Updater plugin may not be able to update this package. This shouldn't normally happen, please report it to https://github.com/tauri-apps/tauri/issues");
     }
 
+    println!("🔍 BUNDLER: Dispatching to bundler for {:?}", package_type);
     let bundle_paths = match package_type {
       #[cfg(target_os = "macos")]
       PackageType::MacOsBundle => macos::app::bundle_project(settings)?,
@@ -149,17 +160,36 @@ pub fn bundle_project(settings: &Settings) -> crate::Result<Vec<Bundle>> {
       }
 
       #[cfg(target_os = "windows")]
-      PackageType::WindowsMsi => windows::msi::bundle_project(settings, false)?,
-      PackageType::WindowsMsix => windows::msix::bundle_project(settings)?,
-      PackageType::Nsis => windows::nsis::bundle_project(settings, false)?,
+      PackageType::WindowsMsi => {
+        println!("🔍 BUNDLER: Calling Windows MSI bundler");
+        windows::msi::bundle_project(settings, false)?
+      },
+      PackageType::WindowsMsix => {
+        println!("🔍 BUNDLER: Calling Windows MSIX bundler");
+        windows::msix::bundle_project(settings)?
+      },
+      PackageType::Nsis => {
+        println!("🔍 BUNDLER: Calling NSIS bundler");
+        windows::nsis::bundle_project(settings, false)?
+      },
 
       #[cfg(target_os = "linux")]
-      PackageType::Deb => linux::debian::bundle_project(settings)?,
+      PackageType::Deb => {
+        println!("🔍 BUNDLER: Calling DEB bundler");
+        linux::debian::bundle_project(settings)?
+      },
       #[cfg(target_os = "linux")]
-      PackageType::Rpm => linux::rpm::bundle_project(settings)?,
+      PackageType::Rpm => {
+        println!("🔍 BUNDLER: Calling RPM bundler");
+        linux::rpm::bundle_project(settings)?
+      },
       #[cfg(target_os = "linux")]
-      PackageType::AppImage => linux::appimage::bundle_project(settings)?,
+      PackageType::AppImage => {
+        println!("🔍 BUNDLER: Calling AppImage bundler");
+        linux::appimage::bundle_project(settings)?
+      },
       _ => {
+        println!("🔍 BUNDLER: No bundler available for package type: {}", package_type.short_name());
         log::warn!("ignoring {}", package_type.short_name());
         continue;
       }
