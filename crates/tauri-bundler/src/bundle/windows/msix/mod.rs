@@ -14,40 +14,55 @@ use std::path::PathBuf;
 /// format and provide better security, installation, and update experiences
 /// compared to traditional installers.
 pub fn bundle_project(settings: &Settings) -> Result<Vec<PathBuf>> {
+    println!("🔍 MSIX: Starting bundle_project");
+    println!("🔍 MSIX: Product name: {}", settings.product_name());
+    println!("🔍 MSIX: Version: {}", settings.version_string());
+    println!("🔍 MSIX: Target: {}", settings.target());
+    
     let package_base_name = format!(
         "{}_{}_{}",
         settings.product_name().replace(' ', ""),
         settings.version_string(),
         settings.target()
     );
+    println!("🔍 MSIX: Package base name: {}", package_base_name);
     
     let output_path = settings
         .project_out_directory()
         .join("bundle")
         .join("msix")
         .join(format!("{}.msix", package_base_name));
+    println!("🔍 MSIX: Output path: {:?}", output_path);
 
     // Ensure output directory exists
     if let Some(parent) = output_path.parent() {
+        println!("🔍 MSIX: Creating output directory: {:?}", parent);
         std::fs::create_dir_all(parent)
             .with_context(|| format!("Failed to create MSIX output directory: {:?}", parent))?;
+        println!("🔍 MSIX: Output directory created successfully");
     }
 
     // Get the main binary path
+    println!("🔍 MSIX: Getting main binary");
     let main_binary = settings.main_binary()?;
     let main_binary_path = settings.binary_path(main_binary);
+    println!("🔍 MSIX: Main binary path: {:?}", main_binary_path);
     let main_binary_name = main_binary_path
         .file_name()
         .ok_or_else(|| anyhow::anyhow!("Invalid main binary path"))?
         .to_string_lossy();
+    println!("🔍 MSIX: Main binary name: {}", main_binary_name);
 
     // Generate package identity  
     let package_name = settings.bundle_identifier().replace(' ', "").replace('-', "_");
+    println!("🔍 MSIX: Package name: {}", package_name);
     
     // Use a default publisher for development (in production, this should be configurable)
     let publisher = "CN=Tauri Development Certificate";
+    println!("🔍 MSIX: Publisher: {}", publisher);
 
     // Build the MSIX package
+    println!("🔍 MSIX: Creating MSIX builder");
     let mut builder = msix(&output_path)
         .identity(&package_name, settings.version_string(), publisher)
         .properties(settings.product_name(), settings.product_name())
@@ -61,15 +76,22 @@ pub fn bundle_project(settings: &Settings) -> Result<Vec<PathBuf>> {
         .default_target_device_family()
         .default_resource()
         .executable(&main_binary_path);
+    println!("🔍 MSIX: MSIX builder configured");
 
     // Add icon if available
     if let Some(icon_path) = settings.icon_files().flatten().next() {
+        println!("🔍 MSIX: Adding icon: {:?}", icon_path);
         builder = builder.icon(icon_path);
+    } else {
+        println!("🔍 MSIX: No icon found");
     }
 
     // Add additional resources
-    for resource in settings.resource_files().iter() {
+    let resources: Vec<_> = settings.resource_files().iter().collect();
+    println!("🔍 MSIX: Adding {} resource files", resources.len());
+    for resource in resources {
         let resource = resource?;
+        println!("🔍 MSIX: Adding resource: {:?} -> {:?}", resource.path(), resource.target());
         builder = builder.add_file(
             resource.path(),
             resource.target(),
@@ -78,9 +100,12 @@ pub fn bundle_project(settings: &Settings) -> Result<Vec<PathBuf>> {
     }
 
     // Add external binaries
-    for src in settings.external_binaries() {
+    let external_binaries: Vec<_> = settings.external_binaries().collect();
+    println!("🔍 MSIX: Adding {} external binaries", external_binaries.len());
+    for src in external_binaries {
         let src_path = src?;
         if let Some(dest_filename) = src_path.file_name() {
+            println!("🔍 MSIX: Adding external binary: {:?} -> {:?}", src_path, dest_filename);
             builder = builder.add_file(
                 &src_path,
                 &PathBuf::from(dest_filename),
@@ -90,10 +115,19 @@ pub fn bundle_project(settings: &Settings) -> Result<Vec<PathBuf>> {
     }
 
     // Build the package
+    println!("🔍 MSIX: Building package...");
     builder.build()
         .with_context(|| format!("Failed to create MSIX package at {:?}", output_path))?;
 
-    println!("MSIX package created at: {}", output_path.display());
+    println!("✅ MSIX package created at: {}", output_path.display());
+    
+    // Verify the file was actually created
+    if output_path.exists() {
+        let metadata = std::fs::metadata(&output_path)?;
+        println!("🔍 MSIX: File size: {} bytes", metadata.len());
+    } else {
+        println!("❌ MSIX: Output file does not exist after build!");
+    }
     
     Ok(vec![output_path])
 }
