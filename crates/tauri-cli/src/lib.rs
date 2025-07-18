@@ -272,9 +272,23 @@ where
     eprintln!("Failed to attach logger: {err}");
   }
 
+  println!("🔍 CLI: Parsed command, verbosity = {}", cli.verbose);
+  
   match cli.command {
-    Commands::Build(options) => build::command(options, cli.verbose)?,
-    Commands::Bundle(options) => bundle::command(options, cli.verbose)?,
+    Commands::Build(options) => {
+      println!("🔍 CLI: Executing Build command");
+      println!("🔍 CLI: Build options: bundles = {:?}, no_bundle = {}, debug = {}", 
+               options.bundles, options.no_bundle, options.debug);
+      build::command(options, cli.verbose)?;
+      println!("🔍 CLI: Build command completed");
+    },
+    Commands::Bundle(options) => {
+      println!("🔍 CLI: Executing Bundle command");
+      println!("🔍 CLI: Bundle options: bundles = {:?}, debug = {}", 
+               options.bundles, options.debug);
+      bundle::command(options, cli.verbose)?;
+      println!("🔍 CLI: Bundle command completed");
+    },
     Commands::Dev(options) => dev::command(options)?,
     Commands::Add(options) => add::command(options)?,
     Commands::Remove(options) => remove::command(options)?,
