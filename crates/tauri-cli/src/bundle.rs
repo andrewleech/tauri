@@ -152,16 +152,20 @@ pub fn bundle<A: AppSettings>(
   out_dir: &Path,
 ) -> crate::Result<()> {
   let package_types: Vec<PackageType> = if let Some(bundles) = &options.bundles {
-    bundles.iter().map(|bundle| bundle.0).collect::<Vec<_>>()
+    println!("🔍 CLI: Bundles provided via --bundles: {:?}", bundles);
+    let package_types = bundles.iter().map(|bundle| bundle.0).collect::<Vec<_>>();
+    println!("🔍 CLI: Converted to package types: {:?}", package_types);
+    package_types
   } else {
-    config
-      .bundle
-      .targets
-      .to_vec()
-      .into_iter()
-      .map(Into::into)
-      .collect()
+    println!("🔍 CLI: No --bundles provided, using config.bundle.targets");
+    let targets = config.bundle.targets.to_vec();
+    println!("🔍 CLI: Config bundle targets: {:?}", targets);
+    let package_types = targets.into_iter().map(Into::into).collect();
+    println!("🔍 CLI: Converted to package types: {:?}", package_types);
+    package_types
   };
+  
+  println!("🔍 CLI: Final package types to bundle: {:?}", package_types);
 
   if package_types.is_empty() {
     return Ok(());
