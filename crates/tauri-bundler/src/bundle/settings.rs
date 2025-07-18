@@ -1015,8 +1015,8 @@ impl Settings {
     let platform_types = match target_os {
       TargetPlatform::MacOS => vec![PackageType::MacOsBundle, PackageType::Dmg],
       TargetPlatform::Ios => vec![PackageType::IosBundle],
-      TargetPlatform::Linux => vec![PackageType::Deb, PackageType::Rpm, PackageType::AppImage],
-      TargetPlatform::Windows => vec![PackageType::WindowsMsi, PackageType::Nsis],
+      TargetPlatform::Linux => vec![PackageType::Deb, PackageType::Rpm, PackageType::AppImage, PackageType::WindowsMsix],
+      TargetPlatform::Windows => vec![PackageType::WindowsMsi, PackageType::Nsis, PackageType::WindowsMsix],
       os => {
         return Err(crate::Error::GenericError(format!(
           "Native {os} bundles not yet supported."
