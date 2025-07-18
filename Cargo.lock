@@ -4636,7 +4636,6 @@ dependencies = [
 [[package]]
 name = "msix"
 version = "0.4.0"
-source = "git+https://github.com/andrewleech/xbuild.git?branch=feature/msix-builder-improvements#71c686a603194312653abdbebb101a41aacabab5"
 dependencies = [
  "anyhow",
  "base64 0.20.0",
@@ -11241,7 +11240,6 @@ dependencies = [
 [[package]]
 name = "xcommon"
 version = "0.3.0"
-source = "git+https://github.com/andrewleech/xbuild.git?branch=feature/msix-builder-improvements#71c686a603194312653abdbebb101a41aacabab5"
 dependencies = [
  "anyhow",
  "byteorder",

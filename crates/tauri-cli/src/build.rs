@@ -99,7 +99,19 @@ pub fn command(mut options: Options, verbosity: u8) -> Result<()> {
 
   let app_settings = interface.app_settings();
 
-  if !options.no_bundle && (config_.bundle.active || options.bundles.is_some()) {
+  println!("🔍 BUILD: About to check bundle condition");
+  println!("🔍 BUILD: options.no_bundle = {}", options.no_bundle);
+  println!("🔍 BUILD: config_.bundle.active = {}", config_.bundle.active);
+  println!("🔍 BUILD: options.bundles.is_some() = {}", options.bundles.is_some());
+  if let Some(ref bundles) = options.bundles {
+    println!("🔍 BUILD: options.bundles = {:?}", bundles);
+  }
+  
+  let should_bundle = !options.no_bundle && (config_.bundle.active || options.bundles.is_some());
+  println!("🔍 BUILD: should_bundle = {}", should_bundle);
+  
+  if should_bundle {
+    println!("🔍 BUILD: Calling bundle function");
     crate::bundle::bundle(
       &options.into(),
       verbosity,
@@ -109,6 +121,9 @@ pub fn command(mut options: Options, verbosity: u8) -> Result<()> {
       config_,
       &out_dir,
     )?;
+    println!("🔍 BUILD: Bundle function completed");
+  } else {
+    println!("🔍 BUILD: Skipping bundle - condition not met");
   }
 
   Ok(())
